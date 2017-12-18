@@ -1,0 +1,93 @@
+/*this program reads input binary file and prints in destination file*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+struct header
+	{
+		short int a[50];
+		float b[5];
+		short int c[5];
+		char d[14];
+		
+	};
+int main(){
+	int counter;
+	FILE *f,*n,*head;
+	struct header rec;	
+	   f=fopen("C:\\Users\\Harsha\\Documents\\intern\\data\\RASSOct2008\\23oc2008.d23","rb");//input file
+	   printf("this is combination\n");
+	if (!f)
+	{
+		printf("Unable to open file!");
+		return 1;
+	}
+	float pow[600][600],max,exp,den,tem,temp;
+    int i,j,z,ty[25];
+    i=0;
+    j=0;
+    z=0;
+    FILE *fp[30];
+char fil[20];
+	fread(&rec.a,sizeof(short int),46,f);
+	fread(&rec.b,sizeof(float),4,f);
+	fread(&rec.c,sizeof(short int),3,f);
+	fread(&rec.d,sizeof(char),14,f);//reads header
+	head=fopen("header.dat","w");
+	for(counter=2;counter<=3;counter++){
+		fprintf(head,"%d\n",rec.a[counter]);
+	}
+/*	for ( counter=0; counter <= 3; counter++)
+	{
+		fprintf(head,"%f\n",rec.b[counter]);	
+	}
+	for(counter=0;counter<=2;counter++){
+		fprintf(head,"%d\n",rec.c[counter]);
+    }//prints header*/
+    while(!feof(f)){//loop runs till end of file is reached
+         z++;
+         		ty[z]=rec.a[21];
+			sprintf(fil,"W\\results%d.dat",z);//destination file
+			printf("%s\n",fil);
+    fp[z] = fopen(fil, "w");
+	fp[0]=fp[z];			
+		printf("power spectrum:\n");
+        for(i=0;i<rec.a[2];i++){
+        	den=0;
+        	exp=0;
+        	for(j=0;j<(rec.a[3]);j++){
+        	fread(&tem,sizeof(float),1,f);
+        	pow[i][j]=tem;
+        	if(pow[i][j]<0){pow[i][j]=0;	}
+			den=den+pow[i][j];
+			}//reads data of corresponding header
+			pow[i][0]=(pow[i][1]+pow[i][rec.a[3]])/2;//removes clutter i.e transmitted frequency
+				if(i<70){for(j=175;j<200;j++){
+			pow[i][rec.a[3]-j]=pow[rec.a[2]-2][rec.a[3]-j];
+		}}
+			max=pow[i][0];
+        	for(j=0;j<(rec.a[3]);j++){
+        		if(max<pow[i][j]){max=pow[i][j];}
+			}//finds maximum value
+      	for(j=rec.a[3]/2;j<(rec.a[3]);j++){
+      		exp=exp+(j-rec.a[3])*pow[i][j];
+		    fprintf(fp[0],"%d	%f\n",j-rec.a[3],(pow[i][j]/max)+i,z);	
+        	}
+			for(j=0;j<(rec.a[3]/2);j++){
+				exp=exp+(j*pow[i][j]);
+		    fprintf(fp[0],"%d	%f\n",j,(pow[i][j])/max+i,z);	
+        	}//writes data to destination file
+	    	fprintf(fp[0],"\n\n");
+		}
+	    fclose(fp[z]);
+	fread(&rec.a,sizeof(short int),46,f);
+	fread(&rec.b,sizeof(float),4,f);
+	fread(&rec.c,sizeof(short int),3,f);
+	fread(&rec.d,sizeof(char),14,f);//reads the next header					
+	}
+	printf("%d\n",z);
+	fprintf(head,"%d\n",z);
+	fclose(head);
+	fclose(f);
+	return 0;
+}
